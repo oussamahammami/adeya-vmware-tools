@@ -1,0 +1,8 @@
+#{{ ansible_managed }}
+
+[vmware-tools-collection]
+name=vmware-tools-collection
+baseurl=http://packages.vmware.com/tools/esx/{{ vmwaretools_esxi_version }}/rhel{{ ansible_distribution_major_version }}/{{ ansible_architecture }}
+enabled={{ vmwaretools_repo_enabled }}
+gpgcheck=1
+gpgkey={{ vmwaretools_yum_server }}{{ vmwaretools_key_name }}

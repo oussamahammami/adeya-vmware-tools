@@ -1,0 +1,13 @@
+---
+
+- name: Restart server
+  command: shutdown -r now "Ansible updates triggered"
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when: vmtools_reboot_confirmation
+
+- name: Wait for server to restart
+  local_action: wait_for port=22 host={{ inventory_hostname }} search_regex=OpenSSH delay=10
+  sudo: false
+  when: vmtools_reboot_confirmation

@@ -1,0 +1,17 @@
+---
+
+# VMTOOLS
+vmwaretools_tools_version: latest
+vmwaretools_yum_server: http://packages.vmware.com
+vmwaretools_key_name: /tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub
+vmwaretools_repo_enabled: 1
+vmwaretools_esxi_version: 5.5p02
+vmwaretools_pkgs:
+  - vmware-tools-esx-kmods
+  - vmware-tools-esx-nox
+  - vmware-tools-vmxnet3-common
+  - vmware-tools-pvscsi-common
+  - vmware-tools-vmmemctl-common
+vmwaretools_uninstall_dir: /root/vmware-tools-distrib
+vmwaretools_uninstall_file: /root/vmware-tools-distrib/bin/vmware-uninstall-tools.pl
+vmtools_reboot_confirmation: false

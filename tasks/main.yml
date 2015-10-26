@@ -1,0 +1,77 @@
+---
+##
+# Uninstall VMware Tools tar.gz version if exist
+##
+
+#- name: Check VMware Service
+#  shell: status vmware-tools
+#  ignore_errors: yes
+#  register: status_vmwaretools
+
+#- debug: msg="the vmwaretools status was {{ status_vmwaretools.stdout }}"
+
+- name: Check vmware-uninstall-tools.pl exists.
+  stat: path={{ vmwaretools_uninstall_file }}
+  register: uninstallpl
+  tags:
+    - adeya-vmware-tools
+
+- name: Uninstall VMware Tools tar.gz version.
+  shell: "{{ vmwaretools_uninstall_file }} -d"
+  when: uninstallpl.stat.xusr is defined and uninstallpl.stat.xusr
+  register: uninstall_vmtools
+  tags:
+    - adeya-vmware-tools
+
+- name: Delete vmware-tools-distrib directory.
+  file: path={{ vmwaretools_uninstall_dir }} state=absent
+  when: uninstall_vmtools|success
+  notify:
+    - Restart server
+    - Wait for server to restart
+  tags:
+    - adeya-vmware-tools
+
+##
+# VMware Tools Centos/Redhat 6
+##
+
+- name: Import the VMware Public Packaging Public key GPG
+  rpm_key: state=present key={{ vmwaretools_yum_server }}{{ vmwaretools_key_name }}
+  when: ansible_distribution_major_version|int <= 6
+  tags:
+    - adeya-vmware-tools
+
+- name: Install VMware Tools repository /etc/yum.repos.d/vmware-tools.repo
+  template: src=vmware-tools.repo.j2 dest=/etc/yum.repos.d/vmware-tools.repo owner=root group=root mode=0644
+  register: new_vm_repo
+  when: ansible_distribution_major_version|int <= 6
+  tags:
+    - adeya-vmware-tools
+
+- name: Install the required VMware Tools packages
+  yum: name={{ item }} state=installed disablerepo='epel' enablerepo='vmware-tools-collection' update_cache=yes
+  with_items: vmwaretools_pkgs
+  when: ansible_distribution_major_version|int <= 6
+  notify:
+    - Restart server
+    - Wait for server to restart
+  tags:
+    - adeya-vmware-tools
+
+##
+# VMware Tools Centos/Redhat 7
+##
+
+- name: Installing Open VMware Tools (open-vm-tools) for CentOS7/RHEL7 and higher.
+  yum: name=open-vm-tools state=installed
+  when: ansible_distribution_major_version|int >= 7
+  tags:
+    - adeya-vmware-tools
+
+- name: Start vmtoolsd for CentOS7/RHEL7 and higher.
+  service: name=vmtoolsd enabled=yes state=started
+  when: ansible_distribution_major_version|int >= 7
+  tags:
+    - adeya-vmware-tools
+
